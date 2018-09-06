@@ -1,4 +1,4 @@
-<p align="center"><img src="./app/assets/images/wowscapelogo.png" alt="wowscapelogo"></p>
+<p align="center"><img src="./app/assets/images/logo.png" alt="logo"></p>
 
 <h1 align="center"> Ages of Warcraft Launcher</h1>
 

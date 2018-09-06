@@ -1,0 +1,109 @@
+{
+  "name": "ageslauncher",
+  "version": "0.0.2",
+  "description": "Launcher for Private Warcraft servers",
+  "productName": "Ages Of Warcraft",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron index.js",
+    "travislinux": "electron-builder --linux --win",
+    "travisdarwin": "electron-builder --mac",
+    "dist": "export ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true && electron-builder",
+    "dist:win": "npm run dist -- --win --x64",
+    "dist:mac": "npm run dist -- --mac",
+    "dist:linux": "npm run dist -- --linux --x64",
+    "dist:all": "npm run dist -- -wl --x64",
+    "lint": "eslint --config .eslintrc.json --ignore-pattern app/assets/js/scripts/*.js . && eslint --config .eslintrc.scripts.json app/assets/js/scripts"
+  },
+  "engines": {
+    "node": "10.5.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agesofwarcraft/launcher.git"
+  },
+  "author": "Ages of Warcraft",
+  "license": "AGPL-3.0",
+  "homepage": "http://www.ageswarcraft.io/",
+  "dependencies": {
+    "adm-zip": "^0.4.11",
+    "async": "^2.6.1",
+    "discord-rpc": "^3.0.0",
+    "ejs": "^2.6.1",
+    "ejs-electron": "^2.0.3",
+    "electron-is-dev": "^0.3.0",
+    "electron-updater": "^3.0.3",
+    "filehound": "^1.16.4",
+    "github-syntax-dark": "^0.5.0",
+    "humanize-duration": "^3.15.1",
+    "jquery": "^3.3.1",
+    "mkdirp": "^0.5.1",
+    "request": "^2.87.0",
+    "rimraf": "^2.6.2",
+    "semver": "^5.5.0",
+    "sshpk": "^1.14.2",
+    "tar-fs": "^1.16.3",
+    "uuid": "^3.3.2",
+    "webtorrent": "^0.102.0",
+    "winreg": "^1.2.4"
+  },
+  "devDependencies": {
+    "electron": "^2.0.5",
+    "electron-builder": "^20.26.1",
+    "eslint": "^5.2.0",
+    "source-map-support": "^0.5.6"
+  },
+  "build": {
+    "appId": "ageslauncher",
+    "productName": "Ages of Warcraft Launcher",
+    "artifactName": "${productName}.${ext}",
+    "copyright": "Copyleft",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": "x64"
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowElevation": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.games",
+      "icon": "build/icon.icns",
+      "type": "distribution"
+    },
+    "linux": {
+      "target": "AppImage",
+      "maintainer": "Ages of Warcraft",
+      "vendor": "Ages of Warcraft",
+      "synopsis": "Private Warcraft server launcher",
+      "description": "Custom launcher which allows users to join Ages of Warcraft easily.",
+      "category": "Game"
+    },
+    "deb": {
+      "compression": "xz",
+      "packageCategory": "Games",
+      "priority": "optional"
+    },
+    "compression": "maximum",
+    "files": [
+      "!{dist,.gitignore,.vscode,docs,dev-app-update.yml,.travis.yml,.nvmrc,.eslintrc.scripts.json,.eslintrc.json}"
+    ],
+    "extraResources": [
+      "libraries"
+    ],
+    "asar": true
+  }
+}

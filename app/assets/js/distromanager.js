@@ -514,7 +514,7 @@ exports.pullRemote = function(){
         return exports.pullLocal()
     }
     return new Promise((resolve, reject) => {
-        const distroURL = "#"
+        const distroURL = "https://raw.githubusercontent.com/AgesOfWarcraft/launcher/master/app/assets/distribution.json"
         const opts = {
             url: distroURL,
             timeout: 2500

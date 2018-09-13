@@ -1,0 +1,51 @@
+{
+    "version": "0.0.2",
+    "discord": {
+        "clientId": "448031788607209475",
+        "smallImageText": "Ages of Warcraft",
+        "smallImageKey": "seal-circle"
+    },
+    "warcraft": {
+        "client": {
+          "folder": "Ages of Warcraft",
+          "torrent": "#"
+        }
+    },
+    "rss": "#",
+    "servers": [
+        {
+            "id": "Ages of Warcraft",
+            "name": "Ages of Warcraft",
+            "description": "Vanilla Warcraft with a twist.",
+            "icon": "https://upload.wikimedia.org/wikipedia/commons/e/eb/WoW_icon.svg",
+            "version": "8.0.1",
+            "address": "logon.agesofwarcraft.io",
+            "discord": {
+                "shortId": "qGM7wv",
+                "largeImageText": "Ages of Warcraft",
+                "largeImageKey": "server-prod"
+            },
+            "mainServer": true,
+            "autoconnect": true,
+            "modules": [
+            ]
+        },
+        {
+            "id": "Localhost",
+            "name": "Localhost",
+            "description": "For the local testing only.",
+            "icon": "https://www.freebsd.org/gifs/daemon_hammer.jpg",
+            "version": "3.3.5",
+            "address": "localhost",
+            "discord": {
+                "shortId": "qGM7wv",
+                "largeImageText": "Ages of Warcraft",
+                "largeImageKey": "server-prod"
+            },
+            "mainServer": false,
+            "autoconnect": true,
+            "modules": [
+            ]
+        }
+    ]
+}

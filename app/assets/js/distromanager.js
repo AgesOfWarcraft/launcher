@@ -499,7 +499,7 @@ exports.Types = {
     File: 'File'
 }
 
-let DEV_MODE = false
+let DEV_MODE = true
 
 const DISTRO_PATH = path.join(ConfigManager.getLauncherDirectory(), 'distribution.json')
 const DEV_PATH = path.join(ConfigManager.getLauncherDirectory(), 'distribution.json')
@@ -515,11 +515,13 @@ exports.pullRemote = function(){
     }
     return new Promise((resolve, reject) => {
         const distroURL = "https://raw.githubusercontent.com/AgesOfWarcraft/launcher/master/app/assets/distribution.json"
+        // const distroURL = '../distribution.json'
         const opts = {
             url: distroURL,
             timeout: 2500
         }
         const distroDest = path.join(ConfigManager.getLauncherDirectory(), 'distribution.json')
+        console.log('<<<<<<:', distroDest, DISTRO_PATH, DEV_PATH)
         request(opts, (error, resp, body) => {
             if(!error){
                 data = DistroIndex.fromJSON(JSON.parse(body))

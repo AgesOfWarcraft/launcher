@@ -41,6 +41,23 @@ class WoWClient {
     return this.torrentClient.torrents.length > 0
   }
 
+  addToDownloadList (torrentUrl) {
+
+    if(this.isDownloading()) {
+      return false
+    }
+
+    this.torrent = this.torrentClient.add(this.torrentUrl, {
+      path: this.path
+    })
+
+    return true
+  }
+
+  getCurrentTorrentFiles () {
+    return this.torrentClient.files
+  }
+
   getDownloadPercent() {
     if(isDownloading()) {
       return this.torrentClient.progress * 100;

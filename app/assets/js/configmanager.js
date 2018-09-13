@@ -5,7 +5,7 @@ const path = require('path')
 const uuidV4 = require('uuid/v4')
 
 const sysRoot = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME)
-const dataPath = path.join(sysRoot, '.wowlauncher')
+const dataPath = path.join(__dirname, '.wowlauncher')
 
 const firstLaunch = !fs.existsSync(dataPath)
 

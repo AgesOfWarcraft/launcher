@@ -2,9 +2,11 @@
  * Script for landing.ejs
  */
 // Requirements
+const download                = require('url-download-file')
 const cp                      = require('child_process')
 const crypto                  = require('crypto')
 const {URL}                   = require('url')
+const fs                      = require('fs')
 
 // Internal Requirements
 const DiscordWrapper          = require('./assets/js/discordwrapper')
@@ -40,8 +42,41 @@ const server_selection_button = document.getElementById('server_selection_button
 const user_text               = document.getElementById('user_text')
 
 let baseClient = null
+
+function getAssetConfig () {
+    const asset = JSON.parse(fs.readFileSync(path.resolve(__dirname, './assets/assetconfig.json')))
+
+    return {
+        prefix: asset['assetConfig'].urlPrefix,
+        suffix: asset['assetConfig'].urlSuffix,
+        links: asset['assets']
+    }
+}
+
+function downloadTorrentFromUrl (url) {
+
+    let source = url;
+    let target = '../../toreents';
+    let progress = (size, total) => console.log(`downloaded ${size}/${total}`)
+
+    console.log('------download-----')
+    console.log(source)
+    console.log(target)
+
+    download(source, target, progress)
+        .then(filename => console.log(`${filename} is downloaded`))
+        .catch(err => console.log(`download failed: ${err}`))
+}
+
 function onWowPathChanged() {
   console.log("onWoWPathChanged")
+  const {prefix, suffix, links} = getAssetConfig()
+
+//   links.forEach(item => {
+//     console.log('------', item.filename)
+//     downloadTorrentFromUrl(prefix + item.filename + suffix)
+//   })
+
   let wowpath = ConfigManager.getWoWPath()
   if(wowpath == "") {
     console.log("onWoWPathChanged: Disabling launch because there is no client.")
@@ -53,7 +88,9 @@ function onWowPathChanged() {
     baseClient.stopDownloads()
   }
 
-  baseClient = new WoWClient(wowpath, DistroManager.getDistribution().warcraft.client.folder, DistroManager.getDistribution().warcraft.client.torrent)
+  let path_torrent = path.resolve(__dirname, 'wow.torrent')
+  console.log('<<<<<<<<<', path_torrent)
+  baseClient = new WoWClient(wowpath, DistroManager.getDistribution().warcraft.client.folder, path_torrent)
   if(!baseClient.downloadIfNotExists()) {
     baseClient.seed()
     setLaunchEnabled(true);
@@ -66,7 +103,11 @@ function onWowPathChanged() {
 
     torrent.on('error', function(err) {
       setLaunchDetails("An error occurred.")
-      console.log(err)
+      console.log('torrent error: ', err)
+    })
+
+    torrent.on('torrent', function (torrent) {
+        setLaunchDetails('Torrent is ready...')
     })
 
     torrent.on('done', function() {
@@ -74,6 +115,10 @@ function onWowPathChanged() {
       toggleLaunchArea(false)
 
       baseClient.seed()
+    })
+
+    torrent.on('wire', function (wire, addr) {
+        console.log('connected to peer with address ' + addr)
     })
 
     torrent.on('download', function() {
@@ -87,7 +132,7 @@ function onWowPathChanged() {
     })
 
     baseClient.getTorrentClient().on('error', function(err) {
-      setLaunchDetails("An error occurred.")
+      setLaunchDetails("An error occurred...")
       console.log(err)
     })
   }

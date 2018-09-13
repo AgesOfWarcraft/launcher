@@ -294,7 +294,7 @@ ipcRenderer.on('distributionIndexDone', (event, res) => {
     if(res) {
         const data = DistroManager.getDistribution()
         syncModConfigurations(data)
-        prepareSettings(true)
+        // prepareSettings(true)
         if(document.readyState === 'complete'){
             showMainUI(data)
         } else {

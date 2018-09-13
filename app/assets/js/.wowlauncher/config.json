@@ -1,0 +1,33 @@
+{
+    "settings": {
+        "wow": {
+            "path": "D:\\"
+        },
+        "launcher": {
+            "allowBackgroundSeeding": false,
+            "backgroundSeedingMaxUpload": 1,
+            "allowPrerelease": false
+        }
+    },
+    "newsCache": {
+        "date": null,
+        "content": null,
+        "dismissed": false
+    },
+    "commonDirectory": "D:\\WorkSpace\\Game-Launcher\\launcher\\app\\assets\\js\\.wowlauncher\\common",
+    "instanceDirectory": "D:\\WorkSpace\\Game-Launcher\\launcher\\app\\assets\\js\\.wowlauncher\\instances",
+    "clientToken": "6116c69ef5764ea18497a0471a1b2766",
+    "selectedServer": "Ages of Warcraft",
+    "selectedAccount": null,
+    "authenticationDatabase": {},
+    "modConfigurations": [
+        {
+            "id": "Ages of Warcraft",
+            "mods": {}
+        },
+        {
+            "id": "Localhost",
+            "mods": {}
+        }
+    ]
+}

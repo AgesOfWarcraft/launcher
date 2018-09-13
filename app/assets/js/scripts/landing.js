@@ -59,10 +59,6 @@ function downloadTorrentFromUrl (url) {
     let target = '../../toreents';
     let progress = (size, total) => console.log(`downloaded ${size}/${total}`)
 
-    console.log('------download-----')
-    console.log(source)
-    console.log(target)
-
     download(source, target, progress)
         .then(filename => console.log(`${filename} is downloaded`))
         .catch(err => console.log(`download failed: ${err}`))

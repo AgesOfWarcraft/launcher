@@ -1,7 +1,7 @@
 {
     "settings": {
         "wow": {
-            "path": "D:\\"
+            "path": "D:\\Download"
         },
         "launcher": {
             "allowBackgroundSeeding": false,
@@ -16,7 +16,7 @@
     },
     "commonDirectory": "D:\\WorkSpace\\Game-Launcher\\launcher\\app\\assets\\js\\.wowlauncher\\common",
     "instanceDirectory": "D:\\WorkSpace\\Game-Launcher\\launcher\\app\\assets\\js\\.wowlauncher\\instances",
-    "clientToken": "6116c69ef5764ea18497a0471a1b2766",
+    "clientToken": "fc0565174d9e4c8587ca7581abab943c",
     "selectedServer": "Ages of Warcraft",
     "selectedAccount": null,
     "authenticationDatabase": {},

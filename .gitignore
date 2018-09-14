@@ -5,3 +5,6 @@
 /logs/
 /dist/
 .DS_Store
+*.torrent
+app/*.torrent
+app/torrent/

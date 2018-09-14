@@ -1,4 +1,4 @@
-const WebTorrent = require('webtorrent')
+const WebTorrent = require('webtorrent-hybrid-electron')
 const fs = require('fs')
 const path = require('path')
 const os = require('os')
@@ -22,18 +22,23 @@ class WoWClient {
   }
 
   downloadIfNotExists() {
-    if(!this.exists()) {
-      this.torrent = this.torrentClient.add(this.torrentUrl, {
-        path: this.path
+    // if(!this.exists()) {
+      // console.log('>>>>>torrent add ', this.path, this.torrentUrl, typeof this.torrentUrl, 'aaaa',  typeof fs.readFile)
+
+      this.torrent = this.torrentClient.add(this.torrentUrl, { path: this.path }, function(torrent, err) {
+        console.log("Client is downloading:", torrent.infoHash)
+        console.log(torrent)
+        console.log(err)
       })
 
       return true;
-    }
+    // }
 
-    return false;
+    // return false;
   }
 
   seed() {
+    console.log('seed:', this.path, this.installFolder)
     this.torrentClient.seed(path.join(this.path, this.installFolder))
   }
 

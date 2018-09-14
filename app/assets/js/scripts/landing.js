@@ -2,7 +2,9 @@
  * Script for landing.ejs
  */
 // Requirements
-const download                = require('url-download-file')
+const download                = require('download-file')
+const magnetLink              = require('magnet-link')
+const Client                  = require('bittorrent-tracker')
 const cp                      = require('child_process')
 const crypto                  = require('crypto')
 const {URL}                   = require('url')
@@ -53,15 +55,17 @@ function getAssetConfig () {
     }
 }
 
-function downloadTorrentFromUrl (url) {
+async function downloadTorrentFromUrl (url, name) {
 
-    let source = url;
-    let target = '../../toreents';
-    let progress = (size, total) => console.log(`downloaded ${size}/${total}`)
+    const options = {
+        directory: path.resolve(__dirname, 'torrent'),
+        filename: name
+    }
 
-    download(source, target, progress)
-        .then(filename => console.log(`${filename} is downloaded`))
-        .catch(err => console.log(`download failed: ${err}`))
+    download(url, options, (err) => {
+        console.log('-------------file ----------------')
+        if (err) console.log(err)
+    })
 }
 
 function onWowPathChanged() {
@@ -70,7 +74,7 @@ function onWowPathChanged() {
 
 //   links.forEach(item => {
 //     console.log('------', item.filename)
-//     downloadTorrentFromUrl(prefix + item.filename + suffix)
+//     downloadTorrentFromUrl(prefix + item.filename + suffix, item.filename)
 //   })
 
   let wowpath = ConfigManager.getWoWPath()
@@ -84,15 +88,19 @@ function onWowPathChanged() {
     baseClient.stopDownloads()
   }
 
-  let path_torrent = path.resolve(__dirname, 'wow.torrent')
-  console.log('<<<<<<<<<', path_torrent)
+  let path_torrent = path.resolve(__dirname, 'wow1.torrent')
+//   let path_torrent = 'magnet:?xt=urn:btih:03137f8c52845230412ef66cbd384705f83cbaf2&dn=client_wow-735_Wow.exe&tr=http%3A%2F%2Fs3-tracker.eu-west-1.amazonaws.com%3A6969%2Fannounce'
+  console.log('<<<<<<<<<', path_torrent, typeof path_torrent)
   baseClient = new WoWClient(wowpath, DistroManager.getDistribution().warcraft.client.folder, path_torrent)
-  if(!baseClient.downloadIfNotExists()) {
+  
+  if(baseClient.downloadIfNotExists()) {
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> download not existes')
     baseClient.seed()
     setLaunchEnabled(true);
   }
 
   let torrent = baseClient.getCurrentTorrent()
+
   if(torrent != null) {
     toggleLaunchArea(true)
     setLaunchEnabled(false)
@@ -103,10 +111,11 @@ function onWowPathChanged() {
     })
 
     torrent.on('torrent', function (torrent) {
-        setLaunchDetails('Torrent is ready...')
+      setLaunchDetails('Torrent is ready...')
     })
 
     torrent.on('done', function() {
+      setLaunchDetails('done')
       setLaunchEnabled(true)
       toggleLaunchArea(false)
 
@@ -117,6 +126,10 @@ function onWowPathChanged() {
         console.log('connected to peer with address ' + addr)
     })
 
+    // torrent.on('ready', function() {
+    //     setLaunchDetails('torrent is ready to use...')
+    // })
+
     torrent.on('download', function() {
       let hoursRemaining = humanize_duration_short(torrent.timeRemaining, { largest: 2, round: true, spacer: '' });
       setLaunchPercentage((torrent.progress * 100).toFixed(1), 100)
@@ -124,6 +137,7 @@ function onWowPathChanged() {
     })
 
     torrent.on('noPeers', function() {
+      console.log('NO PEERS')
       setLaunchDetails("Searching for peers...")
     })
 
@@ -131,7 +145,93 @@ function onWowPathChanged() {
       setLaunchDetails("An error occurred...")
       console.log(err)
     })
+
+    baseClient.getTorrentClient().on('torrent', function(tr) {
+      setLaunchDetails("Client torrent is ready...")
+      console.log('client torrent is ready.... :', tr)
+    })
   }
+
+  var requiredOpts = {
+    infoHash: new Buffer('03137f8c52845230412ef66cbd384705f83cbaf2'), // hex string or Buffer
+    peerId: new Buffer('03137f8c52845230412ef66cbd384705f83cbaf2'), // hex string or Buffer
+    announce: ["http://s3-tracker.eu-west-1.amazonaws.com:6969/announce", "wss://tracker.btorrent.xyz", "wss://tracker.webtorrent.io"], // list of tracker server urls
+    port: 6881 // torrent client port, (in browser, optional)
+  }
+   
+  var optionalOpts = {
+    getAnnounceOpts: function () {
+      // Provide a callback that will be called whenever announce() is called
+      // internally (on timer), or by the user
+      return {
+        uploaded: 0,
+        downloaded: 0,
+        left: 0,
+        customParam: 'blah' // custom parameters supported
+      }
+    },
+    // RTCPeerConnection config object (only used in browser)
+    rtcConfig: {},
+    // User-Agent header for http requests
+    userAgent: '',
+    // Custom webrtc impl, useful in node to specify [wrtc](https://npmjs.com/package/wrtc)
+    wrtc: {},
+  }
+   
+  var client = new Client(requiredOpts)
+   
+  client.on('error', function (err) {
+    // fatal client error!
+    console.log(err.message)
+  })
+   
+  client.on('warning', function (err) {
+    // a tracker was unavailable or sent bad data to the client. you can probably ignore it
+    console.log(err.message)
+  })
+   
+  // start getting peers from the tracker
+  client.start()
+   
+  client.on('update', function (data) {
+    console.log('got an announce response from tracker: ' + data.announce)
+    console.log('number of seeders in the swarm: ' + data.complete)
+    console.log('number of leechers in the swarm: ' + data.incomplete)
+  })
+   
+  client.once('peer', function (addr) {
+    console.log('found a peer: ' + addr) // 85.10.239.191:48623
+  })
+   
+  // announce that download has completed (and you are now a seeder)
+  client.complete()
+   
+  // force a tracker announce. will trigger more 'update' events and maybe more 'peer' events
+  client.update()
+   
+  // provide parameters to the tracker
+  client.update({
+    uploaded: 0,
+    downloaded: 0,
+    left: 0,
+    customParam: 'blah' // custom parameters supported
+  })
+   
+  // stop getting peers from the tracker, gracefully leave the swarm
+  client.stop()
+   
+  // ungracefully leave the swarm (without sending final 'stop' message)
+  client.destroy()
+   
+  // scrape
+  client.scrape()
+   
+  client.on('scrape', function (data) {
+    console.log('got a scrape response from tracker: ' + data.announce)
+    console.log('number of seeders in the swarm: ' + data.complete)
+    console.log('number of leechers in the swarm: ' + data.incomplete)
+    console.log('number of total downloads of this torrent: ' + data.downloaded)
+  })
 }
 
 /* Launch Progress Wrapper Functions */

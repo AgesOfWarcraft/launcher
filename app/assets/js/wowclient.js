@@ -21,25 +21,31 @@ class WoWClient {
     return fs.existsSync(path.join(this.path, this.installFolder, 'Wow.exe'));
   }
 
-  downloadIfNotExists() {
+  downloadIfNotExists(path_dir_torrent, links) {
     // if(!this.exists()) {
-      // console.log('>>>>>torrent add ', this.path, this.torrentUrl, typeof this.torrentUrl, 'aaaa',  typeof fs.readFile)
-
-      this.torrent = this.torrentClient.add(this.torrentUrl, { path: this.path }, function(torrent, err) {
+    links.forEach(link => {
+      console.log(link)
+      console.log(path_dir_torrent, link[Object.keys(link)[0]])
+      console.log('>>>>>torrent add ', path_dir_torrent + '\\' + link[Object.keys(link)[0]])
+    
+      this.torrent = this.torrentClient.add(path_dir_torrent + '\\' + link[Object.keys(link)[0]], { 
+        path: this.path,
+        maxWebConns: 10
+      }, function(torrent, err) {
         console.log("Client is downloading:", torrent.infoHash)
-        console.log(torrent)
-        console.log(err)
+        if (err) console.log(err)
       })
 
       return true;
-    // }
+    })    
 
+    // }
     // return false;
   }
 
   seed() {
     console.log('seed:', this.path, this.installFolder)
-    this.torrentClient.seed(path.join(this.path, this.installFolder))
+    this.torrentClient.seed(path.join(this.path))
   }
 
   isDownloading() {

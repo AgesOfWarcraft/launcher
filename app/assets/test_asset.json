@@ -1,0 +1,18 @@
+{
+	"assetConfig": {
+		"urlPrefix": "https://s3-eu-west-1.amazonaws.com/aow-prod-launcher-media/client/wow-735/",
+		"urlSuffix": "?torrent"
+	},
+	"assets": [
+		{
+			"filename": "1.torrent",
+			"size": 8,
+			"md5": "056cab4cd40ca74651eabe6b850a115f"
+		},
+		{
+			"filename": "2.torrent",
+			"size": 33856,
+			"md5": "269376006971530fa3b9a43ce3f2d361"
+        }
+    ]
+}

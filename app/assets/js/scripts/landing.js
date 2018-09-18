@@ -4,6 +4,9 @@
 // Requirements
 const download                = require('download-file')
 const magnetLink              = require('magnet-link')
+const parseTorrent            = require('parse-torrent')
+const Transmission            = require('transmission')
+const nodeTorrent             = require('node-torrent')
 const Client                  = require('bittorrent-tracker')
 const cp                      = require('child_process')
 const crypto                  = require('crypto')
@@ -46,7 +49,7 @@ const user_text               = document.getElementById('user_text')
 let baseClient = null
 
 function getAssetConfig () {
-    const asset = JSON.parse(fs.readFileSync(path.resolve(__dirname, './assets/assetconfig.json')))
+    const asset = JSON.parse(fs.readFileSync(path.resolve(__dirname, './assets/test_asset.json')))
 
     return {
         prefix: asset['assetConfig'].urlPrefix,
@@ -85,15 +88,20 @@ function onWowPathChanged() {
   }
 
   if(baseClient != null) {
+    console.log('------stop downloads-----')
     baseClient.stopDownloads()
   }
 
-  let path_torrent = path.resolve(__dirname, 'wow1.torrent')
-//   let path_torrent = 'magnet:?xt=urn:btih:03137f8c52845230412ef66cbd384705f83cbaf2&dn=client_wow-735_Wow.exe&tr=http%3A%2F%2Fs3-tracker.eu-west-1.amazonaws.com%3A6969%2Fannounce'
-  console.log('<<<<<<<<<', path_torrent, typeof path_torrent)
+  let parsedTorrent = parseTorrent(fs.readFileSync(__dirname + '/wow.torrent'))
+  let dir_path = path.resolve(__dirname)
+  let path_torrent = path.resolve(__dirname, 'wow2.torrent')
+  console.log(path_torrent)
+
+  if (baseClient) baseClient = null
+
   baseClient = new WoWClient(wowpath, DistroManager.getDistribution().warcraft.client.folder, path_torrent)
   
-  if(baseClient.downloadIfNotExists()) {
+  if(baseClient.downloadIfNotExists(dir_path + '\\torrent', links)) {
     console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> download not existes')
     baseClient.seed()
     setLaunchEnabled(true);
@@ -123,12 +131,8 @@ function onWowPathChanged() {
     })
 
     torrent.on('wire', function (wire, addr) {
-        console.log('connected to peer with address ' + addr)
+        console.log('connected to peer with address ' + addr, wire)
     })
-
-    // torrent.on('ready', function() {
-    //     setLaunchDetails('torrent is ready to use...')
-    // })
 
     torrent.on('download', function() {
       let hoursRemaining = humanize_duration_short(torrent.timeRemaining, { largest: 2, round: true, spacer: '' });
@@ -143,95 +147,96 @@ function onWowPathChanged() {
 
     baseClient.getTorrentClient().on('error', function(err) {
       setLaunchDetails("An error occurred...")
-      console.log(err)
+      console.log('-----------', err)
     })
 
     baseClient.getTorrentClient().on('torrent', function(tr) {
-      setLaunchDetails("Client torrent is ready...")
-      console.log('client torrent is ready.... :', tr)
+    //   setLaunchDetails("Client torrent is ready...")
+      console.log('client torrent is ready.... :', baseClient.getTorrentClient().torrents)
+      console.log('current: ', baseClient.getCurrentTorrent())
     })
   }
 
-  var requiredOpts = {
-    infoHash: new Buffer('03137f8c52845230412ef66cbd384705f83cbaf2'), // hex string or Buffer
-    peerId: new Buffer('03137f8c52845230412ef66cbd384705f83cbaf2'), // hex string or Buffer
-    announce: ["http://s3-tracker.eu-west-1.amazonaws.com:6969/announce", "wss://tracker.btorrent.xyz", "wss://tracker.webtorrent.io"], // list of tracker server urls
-    port: 6881 // torrent client port, (in browser, optional)
-  }
+//   var requiredOpts = {
+//     infoHash: new Buffer('03137f8c52845230412ef66cbd384705f83cbaf2'), // hex string or Buffer
+//     peerId: new Buffer('03137f8c52845230412ef66cbd384705f83cbaf2'), // hex string or Buffer
+//     announce: ["http://s3-tracker.eu-west-1.amazonaws.com:6969/announce", "wss://tracker.btorrent.xyz", "wss://tracker.webtorrent.io"], // list of tracker server urls
+//     port: 6881 // torrent client port, (in browser, optional)
+//   }
    
-  var optionalOpts = {
-    getAnnounceOpts: function () {
-      // Provide a callback that will be called whenever announce() is called
-      // internally (on timer), or by the user
-      return {
-        uploaded: 0,
-        downloaded: 0,
-        left: 0,
-        customParam: 'blah' // custom parameters supported
-      }
-    },
-    // RTCPeerConnection config object (only used in browser)
-    rtcConfig: {},
-    // User-Agent header for http requests
-    userAgent: '',
-    // Custom webrtc impl, useful in node to specify [wrtc](https://npmjs.com/package/wrtc)
-    wrtc: {},
-  }
+//   var optionalOpts = {
+//     getAnnounceOpts: function () {
+//       // Provide a callback that will be called whenever announce() is called
+//       // internally (on timer), or by the user
+//       return {
+//         uploaded: 0,
+//         downloaded: 0,
+//         left: 0,
+//         customParam: 'blah' // custom parameters supported
+//       }
+//     },
+//     // RTCPeerConnection config object (only used in browser)
+//     rtcConfig: {},
+//     // User-Agent header for http requests
+//     userAgent: '',
+//     // Custom webrtc impl, useful in node to specify [wrtc](https://npmjs.com/package/wrtc)
+//     wrtc: {},
+//   }
    
-  var client = new Client(requiredOpts)
+//   var client = new Client(requiredOpts)
    
-  client.on('error', function (err) {
-    // fatal client error!
-    console.log(err.message)
-  })
+//   client.on('error', function (err) {
+//     // fatal client error!
+//     console.log(err.message)
+//   })
    
-  client.on('warning', function (err) {
-    // a tracker was unavailable or sent bad data to the client. you can probably ignore it
-    console.log(err.message)
-  })
+//   client.on('warning', function (err) {
+//     // a tracker was unavailable or sent bad data to the client. you can probably ignore it
+//     console.log(err.message)
+//   })
    
-  // start getting peers from the tracker
-  client.start()
+//   // start getting peers from the tracker
+//   client.start()
    
-  client.on('update', function (data) {
-    console.log('got an announce response from tracker: ' + data.announce)
-    console.log('number of seeders in the swarm: ' + data.complete)
-    console.log('number of leechers in the swarm: ' + data.incomplete)
-  })
+//   client.on('update', function (data) {
+//     console.log('got an announce response from tracker: ' + data.announce)
+//     console.log('number of seeders in the swarm: ' + data.complete)
+//     console.log('number of leechers in the swarm: ' + data.incomplete)
+//   })
    
-  client.once('peer', function (addr) {
-    console.log('found a peer: ' + addr) // 85.10.239.191:48623
-  })
+//   client.once('peer', function (addr) {
+//     console.log('found a peer: ' + addr) // 85.10.239.191:48623
+//   })
    
-  // announce that download has completed (and you are now a seeder)
-  client.complete()
+//   // announce that download has completed (and you are now a seeder)
+//   client.complete()
    
-  // force a tracker announce. will trigger more 'update' events and maybe more 'peer' events
-  client.update()
+//   // force a tracker announce. will trigger more 'update' events and maybe more 'peer' events
+//   client.update()
    
-  // provide parameters to the tracker
-  client.update({
-    uploaded: 0,
-    downloaded: 0,
-    left: 0,
-    customParam: 'blah' // custom parameters supported
-  })
+//   // provide parameters to the tracker
+//   client.update({
+//     uploaded: 0,
+//     downloaded: 0,
+//     left: 0,
+//     customParam: 'blah' // custom parameters supported
+//   })
    
-  // stop getting peers from the tracker, gracefully leave the swarm
-  client.stop()
+//   // stop getting peers from the tracker, gracefully leave the swarm
+//   client.stop()
    
-  // ungracefully leave the swarm (without sending final 'stop' message)
-  client.destroy()
+//   // ungracefully leave the swarm (without sending final 'stop' message)
+//   client.destroy()
    
-  // scrape
-  client.scrape()
+//   // scrape
+//   client.scrape()
    
-  client.on('scrape', function (data) {
-    console.log('got a scrape response from tracker: ' + data.announce)
-    console.log('number of seeders in the swarm: ' + data.complete)
-    console.log('number of leechers in the swarm: ' + data.incomplete)
-    console.log('number of total downloads of this torrent: ' + data.downloaded)
-  })
+//   client.on('scrape', function (data) {
+//     console.log('got a scrape response from tracker: ' + data.announce)
+//     console.log('number of seeders in the swarm: ' + data.complete)
+//     console.log('number of leechers in the swarm: ' + data.incomplete)
+//     console.log('number of total downloads of this torrent: ' + data.downloaded)
+//   })
 }
 
 /* Launch Progress Wrapper Functions */

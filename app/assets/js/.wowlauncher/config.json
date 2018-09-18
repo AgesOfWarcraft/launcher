@@ -1,7 +1,7 @@
 {
     "settings": {
         "wow": {
-            "path": "D:\\Download"
+            "path": "D:\\.wowlauncher"
         },
         "launcher": {
             "allowBackgroundSeeding": false,
